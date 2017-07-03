@@ -1,4 +1,4 @@
-package com.sven.model;
+package com.sven.excel;
 
 import lombok.Data;
 
