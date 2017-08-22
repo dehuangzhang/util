@@ -9,8 +9,8 @@ import org.junit.Test;
 public class StringUtilTest {
     @Test
     public void removeSpecialCharacter() {
-        String str = "&*^$##%^&^&werw我的我的我的我的//*--//";
-        str = StringUtil.removeSpecialCharacters(str);
-        System.out.println(str);
+
+        System.out.println(  StringUtil.isNumberAndLetter("w123"));
+        System.out.println(StringUtil.formatNumber("123",3));
     }
 }

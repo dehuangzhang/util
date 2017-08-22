@@ -3,19 +3,19 @@ package com.sven.util;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.sven.exception.BizException;
 import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSON;
 
 /**
- * bogda可以使用这个StringUtils。该类继承了apache-common包的字符工具类。
+ * 可以使用这个StringUtils。该类继承了apache-common包的字符工具类。
  *
- * @author yingchao.zyc
+ * @author sven
  */
 public class StringUtil extends StringUtils {
-
-    // 一个空的字符串。
-    public final static String EMPTY_STRING = "";
 
     /**
      * 判断一个传入的字符串是否包含英文字母。 ps: 传入null认为不包含英文字母。
@@ -36,26 +36,6 @@ public class StringUtil extends StringUtils {
     }
 
     /**
-     * 如果传入的值是null，返回空字符串，如果不是null，返回本身。
-     *
-     * @param word 传入的源字符串。
-     * @return
-     */
-    public static String getNotNullValue(String word) {
-        return word == null ? "" : word;
-    }
-
-    /**
-     * 如果传入的值是null，返回空字符串，如果不是null，返回本身。
-     *
-     * @param word 传入的源字符串。
-     * @return
-     */
-    public static String getNotNullValue(String word, String defaultWord) {
-        return word == null ? defaultWord : word;
-    }
-
-    /**
      * 判断一个传入的字符串是否全是英文 ps: 传入null返回false。
      *
      * @param word 传入的源字符串。
@@ -65,7 +45,6 @@ public class StringUtil extends StringUtils {
         if (word == null) {
             return false;
         }
-
         for (int i = 0; i < word.length(); i++) {
             if (!Character.isLetter(word.charAt(i))) {
                 return false;
@@ -84,7 +63,6 @@ public class StringUtil extends StringUtils {
         if (isBlank(word)) {
             return false;
         }
-
         for (int i = 0; i < word.length(); i++) {
             if (!Character.isDigit(word.charAt(i))) {
                 return false;
@@ -103,19 +81,8 @@ public class StringUtil extends StringUtils {
         if (word == null) {
             return false;
         }
-
-        // String a = "asgdc";
-        // System.out.println(a.matches("^[a-zA-Z]*"));
-
-        for (int i = 0; i < word.length(); i++) {
-            boolean isLetter = (word.charAt(i) >= 'A' && word.charAt(i) <= 'Z')
-                    || (word.charAt(i) >= 'a' && word.charAt(i) <= 'z');
-            boolean isNumber = word.charAt(i) >= '0' && word.charAt(i) <= '9';
-            if (!(isLetter || isNumber)) {
-                return false;
-            }
-        }
-        return true;
+        Matcher m = Pattern.compile("^[A-Za-z0-9]+$").matcher(word);
+        return m.find();
     }
 
     /**
@@ -150,39 +117,9 @@ public class StringUtil extends StringUtils {
         if (StringUtil.isBlank(str)) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(str.substring(0, 1).toUpperCase()).append(str.substring(1));
-
-        return sb.toString();
-    }
-
-    /**
-     * 对double四舍五入，小数精度通过precision指定
-     *
-     * @param number
-     * @param precision
-     * @return
-     */
-    public static double round(Double number, int precision) {
-        if (number == null) {
-            return 0;
-        }
-        if (precision < 0) {
-            precision = 2;
-        }
-        BigDecimal decimal = new BigDecimal(Double.toString(number)).setScale(precision, BigDecimal.ROUND_HALF_UP);
-        return decimal.doubleValue();
-    }
-
-    /**
-     * 对double四舍五入，保留2位小数
-     *
-     * @param number
-     * @return
-     */
-    public static double round(Double number) {
-        return round(number, 2);
+        char[] cs = str.toCharArray();
+        cs[0] -= 32;
+        return new String(cs);
     }
 
     /**
@@ -274,27 +211,15 @@ public class StringUtil extends StringUtils {
      * @return
      */
     public static String formatNumber(Object obj, int precision) {
-        if (obj instanceof Double || obj instanceof Float) {
-            return String.format("%." + precision + "f", obj);
-        }
-
-        Double d = null;
-        if (obj instanceof String) {
-            d = Double.valueOf((String) obj);
-        } else if (obj instanceof Integer) {
-            d = ((Integer) obj).doubleValue();
-        } else if (obj instanceof Long) {
-            d = ((Long) obj).doubleValue();
-        } else if (obj instanceof BigDecimal) {
-            d = ((BigDecimal) obj).doubleValue();
-        } else {
-            return "";
+        String s = String.valueOf(obj);
+        if(!isNumber(s)){
+            throw new BizException("","参数错误，非数字无法处理");
         }
         if (precision < 0) {
             precision = 2;
         }
-
-        return String.format("%." + precision + "f", d);
+        BigDecimal number = new BigDecimal(s);
+        return String.format("%." + precision + "f", number);
     }
 
     /**
@@ -302,14 +227,6 @@ public class StringUtil extends StringUtils {
      */
     public static String formatNumber(Object obj) {
         return formatNumber(obj, 2);
-    }
-
-    public static final boolean isNotEmpty(String str) {
-        return !isEmpty(str);
-    }
-
-    public static final boolean isEmpty(String str) {
-        return (null == str || str.length() == 0);
     }
 
     /**
@@ -419,7 +336,7 @@ public class StringUtil extends StringUtils {
      * @param num2
      * @return
      */
-    public static int sumTwoNum(int num1, int num2) {
+    public static int sum(int num1, int num2) {
         return num1 + num2;
     }
 
@@ -510,9 +427,5 @@ public class StringUtil extends StringUtils {
         }
         BigDecimal bigDecimal = param.stripTrailingZeros();
         return bigDecimal.toPlainString();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(formatToStr(new BigDecimal("10.001")));
     }
 }
