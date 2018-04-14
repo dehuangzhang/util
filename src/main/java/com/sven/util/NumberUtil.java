@@ -1,11 +1,15 @@
 package com.sven.util;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+
 /**
  * @author sven.CNang
  * @since 2018/4/11
  */
 public class NumberUtil {
     private final static int ZERO_NUMBER = '0';
+    private final static int TEN = 10;
     private final static String[] CN = new String[] {"零", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
     private final static String[] CN_DATE = new String[] {"〇", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
 
@@ -13,51 +17,39 @@ public class NumberUtil {
 
     /**
      * 数字装换为标准数字(只能转换)
+     * (有问题)
      *
      * @param number
      * @return
      */
-    public static String convert(int number) {
-        String str = "";
+    public static String convert(long number) {
+        StringBuilder sb = new StringBuilder();
         if (number < 0) {
             number = Math.abs(number);
-            str = "负";
+            sb.append("负");
         }
-        StringBuffer sb = new StringBuffer(String.valueOf(number));
-        sb = sb.reverse();
-        int r = 0;
-        int l = 0;
-        for (int j = 0; j < sb.length(); j++) {
-            r = Integer.valueOf(sb.charAt(j) - ZERO_NUMBER);
-            if (j == 0) {
-                if (r != 0 || sb.length() == 1) {
-                    str = CN[r];
-                }
+        String n = String.valueOf(number);
+        int r, l = n.length();
+        for (int j = 0; j < n.length(); j++) {
+            r = Integer.valueOf(n.charAt(j) - ZERO_NUMBER);
+            sb.append(CN[r]);
+            if (CN[0].equals(CN[r])) {
                 continue;
             }
-            if (j != 0) {
-                l = Integer.valueOf(sb.charAt(j - 1) - ZERO_NUMBER);
+            int left = l - j;
+            if (left == 8) {
+                sb.append(UNIT[left - 8]);
             }
-            if (j == 1 || j == 2 || j == 3 || j == 5 || j == 6 || j == 7 || j == 9) {
-                if (r != 0) {
-                    str = CN[r] + UNIT[j] + str;
-                } else if (l != 0) {
-                    str = CN[r] + str;
-                }
-                continue;
+            if (left == 4) {
+                sb.append(UNIT[left - 4]);
             }
-            if (j == 4 || j == 8) {
-                str = UNIT[j] + str;
-                if ((l != 0 && r == 0) || r != 0) {
-                    str = CN[r] + str;
-                }
-                continue;
-            }
+            sb.append(UNIT[left - 1]);
         }
-        if (9 < number && number < 20) {
-            str = str.substring(1);
+        String result = sb.toString();
+        if (result.endsWith("零")) {
+            result = result.substring(0, result.length() - 1);
         }
-        return str;
+        return result;
     }
 
     /**
@@ -77,7 +69,57 @@ public class NumberUtil {
         return builder.toString();
     }
 
+    /**
+     * 不足左补零
+     *
+     * @param length 长度
+     * @param number 数字
+     * @return
+     */
+    public static String formatPrefixZero(Integer number, int length) {
+        String f = "%0" + length + "d";
+        return String.format(f, number);
+    }
+
+    /**
+     * 数字转字符串（不使用科学计数法、去除小数点后无用的0）
+     *
+     * @param param
+     * @return
+     */
+    public static String formatAmount(BigDecimal param) {
+        if (null == param) {
+            return "0";
+        }
+        BigDecimal bigDecimal = param.stripTrailingZeros();
+        return bigDecimal.toPlainString();
+    }
+
+    /**
+     * 数字格式化
+     *
+     * @param obj         浮点型数字
+     * @param digit       小数精度
+     * @param isThousands 是否需要千分位
+     * @return
+     */
+    public static String formatNumber(Object obj, int digit, boolean isThousands) {
+        if (obj == null) {
+            return "";
+        }
+        String format = "##";
+        if (isThousands) {
+            format = "###,###";
+        }
+        if (digit > 0) {
+            format += ".00";
+        }
+        DecimalFormat decimalFormat = new DecimalFormat(format);
+        String result = decimalFormat.format(obj);
+        return result;
+    }
+
     public static void main(String[] args) {
-        System.out.println(convert(1100000020));
+        System.out.println(convert(1000000001));
     }
 }

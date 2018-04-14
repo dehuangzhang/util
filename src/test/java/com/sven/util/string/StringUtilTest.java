@@ -10,7 +10,6 @@ public class StringUtilTest {
     @Test
     public void removeSpecialCharacter() {
 
-        System.out.println(  StringUtil.isNumberAndLetter("w123"));
-        System.out.println(StringUtil.formatNumber("123",3));
+        System.out.println(  StringUtil.isContainsNumberAndLetter("w123"));
     }
 }
