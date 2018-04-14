@@ -58,16 +58,13 @@ public class DateFormatUtil {
                 local = FORMAT_LOCAL.get(pattern);
                 if (local == null) {
                     local = new ThreadLocal<>();
-                }
-            }
-        }
-        if (local.get() == null) {
-            synchronized (DateFormatUtil.class) {
-                if (local.get() == null) {
                     local.set(new SimpleDateFormat(pattern));
                     FORMAT_LOCAL.put(pattern, local);
                 }
             }
+        }
+        if (local.get() == null) {
+            local.set(new SimpleDateFormat(pattern));
         }
         return local.get();
     }
